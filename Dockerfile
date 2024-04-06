@@ -1,26 +1,30 @@
-# Usa la imagen base de Python
-FROM python:3.12.0
+FROM python:3.12.0 AS builder
 
-# Establece el directorio de trabajo en /app
 WORKDIR /app
 
-# Copia los archivos de la aplicación al contenedor
+RUN python3 -m venv venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Stage 2
+FROM python:3.12 AS runner
+
 COPY . /app
+WORKDIR /app
 
-# Instala las dependencias de la aplicación
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --from=builder /app/venv venv
+COPY app.py app.py
 
-# Instala uWSGI
-RUN pip install uwsgi
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV FLASK_APP=app/app.py
 
-# Copia el archivo de configuración de uWSGI
-COPY uwsgi.ini /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Copia el archivo de configuración de Nginx
-COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 8080
 
-# Exponer el puerto 80 para que Nginx sea accesible desde fuera del contenedor
-EXPOSE 80
-
-# Ejecutar uWSGI con la configuración proporcionada
-CMD ["uwsgi", "--ini", "uwsgi.ini"]
+CMD ["gunicorn", "--bind" , ":8080", "--workers", "2", "app:app"]
