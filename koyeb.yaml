@@ -1,0 +1,5 @@
+services:
+  - name: flask-app
+    image: nombre_imagen  # Reemplaza 'nombre_imagen' con el nombre de tu imagen Docker
+    ports:
+      - 80:80  # Reemplaza el puerto 5000 si tu aplicación Flask escucha en un puerto diferente
