@@ -5,6 +5,7 @@ import os
 
 @app.route('/api/nodos')
 def obtener_nodos():
+    print(app.config)
     print(os.getenv('NEO4J_URI'))
     records = makeQuery("""
 Match(p:Person {name: 'Tom Cruise'})

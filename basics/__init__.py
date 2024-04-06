@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['NEO4J_URI'] = os.getenv('NEO4J_URI')
-app.config['NEO4J_USER'] = os.getenv('NEO4J_USER')
+app.config['NEO4J_USER'] = os.getenv('NEO4J_USERNAME')
 app.config['NEO4J_PASSWORD'] = os.getenv('NEO4J_PASSWORD')
 
 neo4j_driver = GraphDatabase.driver(app.config['NEO4J_URI'],

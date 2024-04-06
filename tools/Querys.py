@@ -21,6 +21,8 @@ def makeQuery(query: LiteralString = 'MATCH (n) RETURN n', params=None, listOffI
 
 def convertJson(records):
     ret = []
+    if len(records) == 0:
+        return jsonify([])
     if len(records[0]) > 1:
         for record in records:
             ret.append([r.to_json() for r in record])
