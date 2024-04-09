@@ -1,4 +1,7 @@
+from datetime import date
+
 import neo4j.graph
+from neo4j import graph
 
 
 class NodeD:
@@ -27,8 +30,34 @@ class RelationshipD:
         return f'{self.node1} - {self.type} - {self.node2} ' + str(self.properties)
 
 
+def _format_properties(properties):
+    # Formatear las propiedades para la consulta Cypher
+    if not properties:
+        return ""
+
+    def typed(val):
+        if isinstance(val, str):
+            return f"'{val.replace('\'', '\\\'')}'"
+        if isinstance(val, bool):
+            return str(val).lower()
+        if isinstance(val, dict):
+            return "{" + ", ".join(f"{key}: {typed(value)}" for key, value in val.items()) + "}"
+        if isinstance(val, list):
+            return "[" + ", ".join(typed(value) for value in val) + "]"
+        if isinstance(val, int):
+            return str(val)
+        if isinstance(val, float):
+            return str(val)
+        if isinstance(val, date):
+            return f"date('{val}')"
+        return str(val)
+
+    formatted_props = "{" + ", ".join(f"{key}: {typed(value)}" for key, value in properties.items()) + "}"
+    return formatted_props
+
+
 def transFormObject(obj):
-    if isinstance(obj, neo4j.graph.Node):
+    if isinstance(obj, graph.Node):
         labels = list(obj.labels)
         properties = dict(obj)
         return NodeD(labels, properties)
@@ -39,6 +68,3 @@ def transFormObject(obj):
         return RelationshipD(typeR, properties, nodesR[0], nodesR[1])
 
     return obj
-
-
-

@@ -7,13 +7,7 @@ import os
 def obtener_nodos():
     print(app.config)
     print(os.getenv('NEO4J_URI'))
-    records = makeQuery("""
-Match(p:Person {name: 'Tom Cruise'})
-MATCH(m:Movie)
-MATCH(p) - [r] - (m)
-
-return p, r, m
-    """, listOffIndexes=['r', 'm'])
+    records = makeQuery()
     return convertJson(records)
 
 

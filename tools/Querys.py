@@ -1,11 +1,37 @@
-from .Classes import transFormObject
-from typing import LiteralString
 from basics import neo4j_driver
 from neo4j import Result
 from basics import jsonify
+from .Classes import NodeD, transFormObject, _format_properties
+from typing import List
 
 
-def makeQuery(query: LiteralString = 'MATCH (n) RETURN n', params=None, listOffIndexes=None):
+def createNode(labels: List[str], params=None, merge=False):
+    if params is None:
+        params = {}
+
+    with neo4j_driver.session() as session:
+        cypher_query = f"CREATE (node:`{':'.join(labels)}` {_format_properties(params)})"
+        if merge:
+            cypher_query = f"MERGE (node:{':'.join(labels)} {_format_properties(params)})"
+        session.run(cypher_query)
+
+
+def createRelationship(node1: NodeD, node2: NodeD, typeR: str, properties=None, merge=True):
+    if properties is None:
+        properties = {}
+
+    with neo4j_driver.session() as session:
+        cypher_query = f"MATCH (a:{':'.join(node1.labels)} {_format_properties(node1.properties)}) " \
+                       f"MATCH (b:{':'.join(node2.labels)} {_format_properties(node2.properties)}) " \
+                       f"CREATE (a)-[r:{typeR} {_format_properties(properties)}]->(b)"
+        if merge:
+            cypher_query = f"MATCH (a:{':'.join(node1.labels)} {_format_properties(node1.properties)}) " \
+                           f"MATCH (b: {':'.join(node2.labels)} {_format_properties(node2.properties)}) " \
+                           f"MERGE (a)-[r:{typeR} {_format_properties(properties)}]->(b)"
+        session.run(cypher_query)
+
+
+def makeQuery(query: str = 'MATCH (n) RETURN n', params=None, listOffIndexes=None):
     if listOffIndexes is None:
         listOffIndexes = ['n']
     if params is None:
@@ -16,6 +42,19 @@ def makeQuery(query: LiteralString = 'MATCH (n) RETURN n', params=None, listOffI
         records = []
         for n in nodes:
             records.append(tuple([transFormObject(n[index]) for index in listOffIndexes]))
+        return records
+
+
+def searchNode(labels: List[str], properties=None):
+    if properties is None:
+        properties = {}
+
+    with neo4j_driver.session() as session:
+        cypher_query = f"MATCH (node:{':'.join(labels)} {_format_properties(properties)}) RETURN node"
+        nodes = session.run(cypher_query)
+        records = []
+        for n in nodes:
+            records.append(transFormObject(n['node']))
         return records
 
 
