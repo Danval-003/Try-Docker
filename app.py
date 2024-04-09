@@ -1,12 +1,13 @@
 from basics import app, neo4j_driver, jsonify
 from tools import *
-from routes import create, delete
+from routes import create, delete, read
 import os
 import warnings
 from gridfs_routes import gridR
 
 app.register_blueprint(create)
 app.register_blueprint(delete)
+app.register_blueprint(read)
 app.register_blueprint(gridR)
 
 

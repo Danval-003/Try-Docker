@@ -30,7 +30,7 @@ class RelationshipD:
         return f'{self.node1} - {self.type} - {self.node2} ' + str(self.properties)
 
 
-def _format_properties(properties):
+def format_properties(properties):
     # Formatear las propiedades para la consulta Cypher
     if not properties:
         return ""

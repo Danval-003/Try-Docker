@@ -1,7 +1,7 @@
 from basics import neo4j_driver
 from neo4j import Result
 from basics import jsonify
-from .Classes import NodeD, transFormObject, _format_properties
+from .Classes import NodeD, transFormObject, format_properties
 from typing import List
 
 
@@ -10,9 +10,9 @@ def createNode(labels: List[str], params=None, merge=False):
         params = {}
 
     with neo4j_driver.session() as session:
-        cypher_query = f"CREATE (node:{':'.join(labels)} {_format_properties(params)})"
+        cypher_query = f"CREATE (node:{':'.join(labels)} {format_properties(params)})"
         if merge:
-            cypher_query = f"MERGE (node:{':'.join(labels)} {_format_properties(params)})"
+            cypher_query = f"MERGE (node:{':'.join(labels)} {format_properties(params)})"
         session.run(cypher_query)
 
 
@@ -22,16 +22,16 @@ def createRelationship(node1: NodeD, node2: NodeD, typeR: str, properties=None, 
 
     with neo4j_driver.session() as session:
         cypher_query = f"MATCH (a{':' if len(node1.labels) > 0 else ''}{':'.join(node1.labels)} " \
-                       f"{_format_properties(node1.properties)}) " \
+                       f"{format_properties(node1.properties)}) " \
                        f"MATCH (b{':' if len(node2.labels) > 0 else ''}{':'.join(node2.labels)}" \
-                       f" {_format_properties(node2.properties)}) " \
-                       f"CREATE (a)-[r:{typeR} {_format_properties(properties)}]->(b)"
+                       f" {format_properties(node2.properties)}) " \
+                       f"CREATE (a)-[r:{typeR} {format_properties(properties)}]->(b)"
         if merge:
             cypher_query = f"MATCH (a{':' if len(node1.labels) > 0 else ''}{':'.join(node1.labels)}" \
-                           f"{_format_properties(node1.properties)}) " \
+                           f"{format_properties(node1.properties)}) " \
                            f"MATCH (b{':' if len(node2.labels) > 0 else ''}{':'.join(node2.labels)} " \
-                           f"{_format_properties(node2.properties)}) " \
-                           f"MERGE (a)-[r:{typeR} {_format_properties(properties)}]->(b)"
+                           f"{format_properties(node2.properties)}) " \
+                           f"MERGE (a)-[r:{typeR} {format_properties(properties)}]->(b)"
         session.run(cypher_query)
 
 
@@ -55,7 +55,7 @@ def searchNode(labels: List[str], properties=None):
 
     with neo4j_driver.session() as session:
         cypher_query = f"MATCH (node{':' if len(labels) > 0 else ''}{':'.join(labels)} " \
-                       f"{_format_properties(properties)}) RETURN node"
+                       f"{format_properties(properties)}) RETURN node"
         nodes = session.run(cypher_query)
         records = []
         for n in nodes:
@@ -81,7 +81,7 @@ def detachDeleteNode(properties=None, labels=None):
         properties = {}
     with neo4j_driver.session() as session:
         cypher_query = f"MATCH (node{':' if len(labels) > 0 else ''}{':'.join(labels)}" \
-                       f" {_format_properties(properties)}) DETACH DELETE node"
+                       f" {format_properties(properties)}) DETACH DELETE node"
         session.run(cypher_query)
 
 
@@ -90,5 +90,5 @@ def updateNode(labels: List[str], properties=None):
         properties = {}
     with neo4j_driver.session() as session:
         cypher_query = f"MATCH (node{':' if len(labels) > 0 else ''}{':'.join(labels)}" \
-                       f" {_format_properties(properties)}) SET node += {properties}"
+                       f" {format_properties(properties)}) SET node += {properties}"
         session.run(cypher_query)
